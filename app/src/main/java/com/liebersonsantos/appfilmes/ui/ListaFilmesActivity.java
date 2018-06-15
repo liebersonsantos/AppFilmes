@@ -3,35 +3,39 @@ package com.liebersonsantos.appfilmes.ui;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.Toast;
 
 import com.liebersonsantos.appfilmes.R;
+import com.liebersonsantos.appfilmes.model.Filme;
 import com.liebersonsantos.appfilmes.model.mapper.MovieMapper;
-import com.liebersonsantos.appfilmes.utils.Constantes;
 import com.liebersonsantos.appfilmes.netWork.ApiService;
 import com.liebersonsantos.appfilmes.netWork.response.MovieResult;
+import com.liebersonsantos.appfilmes.utils.Constantes;
+
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ListaFilmesActivity extends AppCompatActivity {
+public class ListaFilmesActivity extends AppCompatActivity implements ListMovieContract.ListMovieView{
 
     private android.support.v7.widget.Toolbar toolbar;
     private RecyclerView mRecyclerView;
     private ListaFilmesAdapter filmesAdapter;
+    ListMovieContract.ListMoviePresenter presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_filmes);
 
+        presenter = new ListMoviePresenter(this);
+
         initViews();
         settingsAdapter();
-        getMovieAPi();
-
+        presenter.getMovieAPi();
     }
 
     private void initViews() {
@@ -43,33 +47,15 @@ public class ListaFilmesActivity extends AppCompatActivity {
 
     }
 
-    private void getMovieAPi() {
 
-        ApiService.getInstance().getPopularMovies(Constantes.API_KEY).enqueue(new Callback<MovieResult>() {
-            @Override
-            public void onResponse(Call<MovieResult> call, Response<MovieResult> response) {
+    @Override
+    public void showMovie(List<Filme> filmeList) {
 
-                if (response.isSuccessful()){ /* statu code >= 200 || < 300*/
-
-                    filmesAdapter.setMovies(MovieMapper.responseToDomain(response.body().getResults()));
-                }else {
-
-                    showError();
-                }
-
-            }
-
-            @Override
-            public void onFailure(Call<MovieResult> call, Throwable t) {
-
-               showError();
-            }
-        });
-
+        filmesAdapter.setMovies(filmeList);
     }
 
-    private void showError() {
-
+    @Override
+    public void showError() {
         Toast.makeText(this, "Erro ao obter lista dos filmes", Toast.LENGTH_SHORT).show();
     }
 
@@ -81,7 +67,11 @@ public class ListaFilmesActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(filmesAdapter);
     }
 
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        presenter.viewDestroy(); //quando a activity for destruida, o presenter perderá a referencia da mesma
+    }
 
     //    private List<Filme> createDataMovie() { //METODO PARA CRIAR LISTA FICTICIA PARA TESTE
 //        return Arrays.asList(

@@ -13,7 +13,6 @@ import com.liebersonsantos.appfilmes.R;
 import com.liebersonsantos.appfilmes.model.Filme;
 import com.liebersonsantos.appfilmes.utils.Constantes;
 import com.liebersonsantos.appfilmes.utils.ImageUtil;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
